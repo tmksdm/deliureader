@@ -17,3 +17,17 @@
   строкой, разбор оставляем LLM.
 - Решение по неймингу: продуктовое название — **DeliuReader**. Внутреннее имя из ТЗ
   (AudioBookBriefs) в UI и коде не используется.
+
+
+## Этап 3. PWA: manifest и иконки
+- Папка `icons/`: исходник `icon-source.svg` (тёмно-синий фон #1a2a4a, белая «Д»
+  с засечками), сгенерированы `icon-192.png` и `icon-512.png` через CloudConvert.
+- Создан `manifest.json` в корне: name/short_name = «DeliuReader», `display: standalone`,
+  `start_url` и `scope` = `/deliureader/`, theme_color #1a2a4a, background_color #f5f3ee,
+  три записи в icons (192 any, 512 any, 512 maskable).
+- `index.html`: исправлен `<title>` (был «AudioBookBriefs»), добавлены `<meta name="theme-color">`,
+  `<link rel="manifest">`, `<link rel="icon">`, `<link rel="apple-touch-icon">`,
+  `<meta name="description">`.
+- Проверки: Chrome DevTools → Application → Manifest — без ошибок, иконки отображаются.
+  PWA устанавливается на телефон, открывается в standalone-режиме без адресной строки.
+- TODO про замену «AudioBookBriefs» в UI — закрыт.
