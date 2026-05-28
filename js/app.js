@@ -1,6 +1,7 @@
 // js/app.js
 // Точка входа приложения DeliuReader.
-// Этап 4: заглушка генерации — по клику показываем фиктивный пересказ.
+// Этап 4: заглушка генерации.
+// Этап 5: подключена кнопка «Слушать» — озвучивает текст из карточки.
 
 const FAKE_SUMMARY = `Это тестовый пересказ. Настоящий текст будет приходить от языковой модели позже, на этапе 10. Сейчас наша задача — убедиться, что кнопка работает, текст появляется на экране, а блок с результатом выглядит аккуратно.
 
@@ -8,14 +9,15 @@ const FAKE_SUMMARY = `Это тестовый пересказ. Настоящи
 
 На этом этапе не важно, какую книгу ты ввёл в поле — ответ всегда один и тот же. Это нормально. Главное — что весь путь «нажал кнопку → увидел текст» работает от начала до конца.`;
 
-// Ждём, пока загрузится вся HTML-страница, и только потом ищем элементы.
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput = document.getElementById('query');
   const generateBtn = document.getElementById('generate-btn');
   const resultBlock = document.getElementById('result');
   const resultText = document.getElementById('result-text');
   const resultTitle = document.getElementById('result-title');
+  const speakBtn = document.getElementById('speak-btn');
 
+  // --- Этап 4: показать фиктивный пересказ ---
   generateBtn.addEventListener('click', () => {
     const query = queryInput.value.trim();
 
@@ -24,12 +26,16 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Показываем блок результата и заполняем его.
     resultTitle.textContent = query;
     resultText.textContent = FAKE_SUMMARY;
     resultBlock.hidden = false;
 
-    // Прокручиваем экран к результату, чтобы его сразу было видно.
     resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // --- Этап 5: озвучить текст пересказа ---
+  speakBtn.addEventListener('click', () => {
+    const text = resultText.textContent;
+    speak(text);   // функция объявлена в js/tts.js
   });
 });

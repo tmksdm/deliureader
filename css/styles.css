@@ -122,3 +122,27 @@ button.primary:active {
   white-space: pre-wrap;       /* сохраняем переносы строк из JS-строки */
   word-wrap: break-word;
 }
+
+/* === Этап 5: кнопка «Слушать» === */
+
+.result__controls {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+button.secondary {
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a2a4a;
+  background: #ffffff;
+  border: 1px solid #1a2a4a;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+button.secondary:active {
+  opacity: 0.7;
+}
