@@ -4,8 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AudioBookBriefs</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <h1>Hello</h1>
+  <header>
+    <h1>AudioBookBriefs</h1>
+    <p>10-минутный аудиопересказ книги</p>
+  </header>
+
+  <main>
+    <div class="field">
+      <label for="author">Автор</label>
+      <input id="author" type="text" placeholder="Например, Достоевский" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label for="title">Название</label>
+      <input id="title" type="text" placeholder="Например, Преступление и наказание" autocomplete="off">
+    </div>
+
+    <button class="primary" id="generate-btn">Получить пересказ</button>
+  </main>
 </body>
 </html>
