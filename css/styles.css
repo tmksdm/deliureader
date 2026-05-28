@@ -91,3 +91,34 @@ button.primary {
 button.primary:active {
   opacity: 0.7;
 }
+
+/* === Этап 4: блок результата === */
+
+.result {
+  margin-top: 24px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e0d5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.result[hidden] {
+  display: none;
+}
+
+.result__title {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1a2a4a;
+  word-wrap: break-word;
+}
+
+.result__text {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #2a2a2a;
+  white-space: pre-wrap;       /* сохраняем переносы строк из JS-строки */
+  word-wrap: break-word;
+}
