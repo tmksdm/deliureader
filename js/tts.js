@@ -155,27 +155,38 @@ function startUtteranceFrom(offset) {
   window.speechSynthesis.cancel();
 
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'ru-RU';
+
+  // Порядок важен для Android Chrome: сначала voice и lang, потом rate.
+  // Если rate выставить ДО voice — на некоторых сборках игнорируется.
+  if (russianVoice) {
+    utterance.voice = russianVoice;
+    utterance.lang = russianVoice.lang || 'ru-RU';
+    console.log('TTS: голос', russianVoice.name, russianVoice.lang);
+  } else {
+    utterance.lang = 'ru-RU';
+    console.warn('TTS: русский голос не найден, читаю дефолтным');
+  }
   utterance.rate = ttsState.rate;
   utterance.pitch = 1.0;
   utterance.volume = 1.0;
+  console.log('TTS: rate =', ttsState.rate);
 
-  if (russianVoice) {
-    utterance.voice = russianVoice;
-    console.log('TTS: голос', russianVoice.name, russianVoice.lang);
-  } else {
-    console.warn('TTS: русский голос не найден, читаю дефолтным');
-  }
 
   ttsState.utteranceStartOffset = offset;
   ttsState.currentCharIndex = offset;
 
+  // На Android Chrome событие onstart часто не приходит — ставим состояние
+  // сразу при вызове speak(), не дожидаясь подтверждения от браузера.
+  ttsState.isPlaying = true;
+  ttsState.isPaused = false;
+  console.log('TTS: запускаем чтение с позиции', offset);
+  notifyStateChange();
+
   utterance.onstart = () => {
-    ttsState.isPlaying = true;
-    ttsState.isPaused = false;
-    console.log('TTS: начали читать с позиции', offset);
-    notifyStateChange();
+    // Подстраховка для десктопа: если onstart всё-таки придёт — просто лог.
+    console.log('TTS: подтверждено начало');
   };
+
 
   utterance.onend = () => {
     if (ttsState.isPlaying) {
