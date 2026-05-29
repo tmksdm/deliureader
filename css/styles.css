@@ -149,7 +149,7 @@ button.primary:active {
   position: relative;
   margin-top: 18px;
   /* Резервируем место справа под селект скорости, чтобы кнопки не наезжали. */
-  padding-right: 110px;
+  padding-right: 80px;
   min-height: 44px;
 }
 
