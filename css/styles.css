@@ -117,22 +117,44 @@ button.primary:active {
 
 .result__text {
   font-size: 1rem;
-  line-height: 1.55;
+  line-height: 1.7;
   color: #2a2a2a;
-  white-space: pre-wrap;       /* сохраняем переносы строк из JS-строки */
+  white-space: pre-wrap;       /* сохраняем переносы строк из исходного текста */
   word-wrap: break-word;
 }
 
-/* === Этап 5: кнопка «Слушать» === */
+/* === Этап 6: кликабельные слова и подсветка === */
+
+.result__text .word {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 1px 2px;
+  margin: 0 -2px;              /* компенсируем padding, чтобы не «распирало» строку */
+  transition: background-color 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.result__text .word:hover {
+  background-color: #f0ece2;
+}
+
+.result__text .word--active {
+  background-color: #fde68a;   /* мягкий жёлтый — как в Audible/Speechify */
+  color: #1a1a1a;
+}
+
+/* === Этап 6: блок управления плеером === */
 
 .result__controls {
-  margin-top: 16px;
+  margin-top: 18px;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
 }
 
 button.secondary {
-  padding: 12px 18px;
+  padding: 12px 16px;
   font-size: 15px;
   font-weight: 600;
   color: #1a2a4a;
@@ -141,8 +163,34 @@ button.secondary {
   border-radius: 10px;
   cursor: pointer;
   transition: opacity 0.15s;
+  white-space: nowrap;
 }
 
 button.secondary:active {
   opacity: 0.7;
+}
+
+button.secondary[hidden] {
+  display: none;
+}
+
+.rate-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;           /* прижимаем селект к правому краю */
+  font-size: 13px;
+  color: #6b6b6b;
+}
+
+.rate-control select {
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a2a4a;
+  background: #ffffff;
+  border: 1px solid #1a2a4a;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
 }
