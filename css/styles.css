@@ -146,11 +146,11 @@ button.primary:active {
 /* === Этап 6: блок управления плеером === */
 
 .result__controls {
+  position: relative;
   margin-top: 18px;
-  display: grid;
-  /* Кнопки в один ряд (с переносом по необходимости), скорость — на отдельной строке. */
-  grid-template-columns: 1fr;
-  gap: 12px;
+  /* Резервируем место справа под селект скорости, чтобы кнопки не наезжали. */
+  padding-right: 110px;
+  min-height: 44px;
 }
 
 .result__buttons {
@@ -183,30 +183,33 @@ button.secondary[hidden] {
 }
 
 .rate-control {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 6px;
+  height: 44px;
+  font-size: 12px;
   color: #6b6b6b;
-  justify-self: end;          /* прижимаем к правому краю в grid */
 }
 
 .rate-control select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  padding: 10px 30px 10px 12px;
-  font-size: 14px;
+  padding: 8px 26px 8px 10px;
+  font-size: 13px;
   font-weight: 600;
   color: #1a2a4a;
   background-color: #ffffff;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%231a2a4a' d='M6 8L2 4h8z'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'><path fill='%231a2a4a' d='M6 8L2 4h8z'/></svg>");
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 8px center;
   border: 1px solid #1a2a4a;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   outline: none;
   line-height: 1.2;
-  min-height: 44px;
+  min-height: 36px;
 }
