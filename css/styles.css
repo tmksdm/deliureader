@@ -147,6 +147,13 @@ button.primary:active {
 
 .result__controls {
   margin-top: 18px;
+  display: grid;
+  /* Кнопки в один ряд (с переносом по необходимости), скорость — на отдельной строке. */
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.result__buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -164,6 +171,7 @@ button.secondary {
   cursor: pointer;
   transition: opacity 0.15s;
   white-space: nowrap;
+  min-height: 44px;
 }
 
 button.secondary:active {
@@ -178,9 +186,9 @@ button.secondary[hidden] {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
   font-size: 13px;
   color: #6b6b6b;
+  justify-self: end;          /* прижимаем к правому краю в grid */
 }
 
 .rate-control select {
@@ -200,6 +208,5 @@ button.secondary[hidden] {
   cursor: pointer;
   outline: none;
   line-height: 1.2;
-  min-height: 42px;            /* совпадает по высоте с button.secondary */
+  min-height: 44px;
 }
-
