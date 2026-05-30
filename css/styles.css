@@ -321,7 +321,8 @@ header {
 }
 
 /* Воздух между полями внутри окна настроек */
-.modal__box .field + .field {
+.field--spaced {
   margin-top: 18px;
 }
+
 
