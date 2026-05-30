@@ -1,13 +1,18 @@
 // js/storage.js
 // Модуль хранения настроек DeliuReader в памяти браузера (localStorage).
 // Этап 7: API-ключ OpenRouter + выбранная модель.
+// Этап 11: история пересказов (сохранение, чтение, удаление).
 
 // Ключи, под которыми храним данные в localStorage.
 // Префикс "deliu." — чтобы не пересекаться с чужими записями.
 const STORAGE_KEYS = {
   apiKey: 'deliu.apiKey',
-  modelId: 'deliu.modelId'
+  modelId: 'deliu.modelId',
+  history: 'deliu.history'
 };
+
+// Сколько пересказов максимум храним. Старые сверх лимита выкидываются.
+const HISTORY_LIMIT = 50;
 
 // --- API-ключ ---
 
@@ -62,4 +67,86 @@ async function loadModels() {
     console.error('STORAGE: ошибка чтения models.json', err);
     return [];
   }
+}
+
+// --- История пересказов (этап 11) ---
+//
+// Каждая запись истории — объект:
+//   { id: '...', query: 'Достоевский Идиот', text: '<полный текст>', createdAt: 1716000000000 }
+// id — уникальная строка, query — запрос пользователя, text — текст пересказа,
+// createdAt — время создания в миллисекундах (для сортировки и показа даты).
+//
+// Весь список лежит одной JSON-строкой в localStorage под ключом deliu.history.
+// Новые записи кладём в начало списка, чтобы свежее было сверху.
+
+// Прочитать всю историю. Возвращает массив записей (новые — первыми).
+// Если ничего не сохранено или данные битые — вернёт пустой массив.
+function getHistory() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.history);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('STORAGE: история повреждена, возвращаю пустой список', err);
+    return [];
+  }
+}
+
+// Внутренний помощник: записать массив истории обратно в localStorage.
+function saveHistoryArray(items) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(items));
+  } catch (err) {
+    // Самая вероятная причина — переполнение localStorage.
+    console.error('STORAGE: не удалось сохранить историю', err);
+  }
+}
+
+// Сгенерировать простой уникальный id для записи.
+function makeHistoryId() {
+  return 'h' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+}
+
+// Добавить пересказ в историю. Возвращает созданную запись (с её id).
+// Новая запись встаёт в начало списка; если записей стало больше лимита —
+// самые старые (в конце списка) отбрасываются.
+function addHistoryItem(query, text) {
+  const items = getHistory();
+
+  const item = {
+    id: makeHistoryId(),
+    query: (query || '').trim(),
+    text: text || '',
+    createdAt: Date.now()
+  };
+
+  items.unshift(item);                 // новая запись — в начало
+  const trimmed = items.slice(0, HISTORY_LIMIT); // обрезаем хвост сверх лимита
+
+  saveHistoryArray(trimmed);
+  return item;
+}
+
+// Найти одну запись по id. Вернёт объект записи или null.
+function getHistoryItem(id) {
+  return getHistory().find((item) => item.id === id) || null;
+}
+
+// Удалить одну запись по id.
+function deleteHistoryItem(id) {
+  const items = getHistory().filter((item) => item.id !== id);
+  saveHistoryArray(items);
+}
+
+// Удалить несколько записей сразу по массиву id (удаление пачкой).
+function deleteHistoryItems(ids) {
+  const idsSet = new Set(ids || []);
+  const items = getHistory().filter((item) => !idsSet.has(item.id));
+  saveHistoryArray(items);
+}
+
+// Удалить всю историю целиком.
+function clearHistory() {
+  localStorage.removeItem(STORAGE_KEYS.history);
 }
