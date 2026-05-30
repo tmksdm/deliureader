@@ -7,6 +7,7 @@
 // Этап 10: реальная генерация — ввод → LLM → пересказ → озвучка.
 // Этап 10.4: панель кнопок закреплена внизу, пока показан пересказ.
 // Этап 11: история пересказов — автосохранение, список, открытие, удаление.
+// Этап 13: скачивание пересказа как .txt.
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
@@ -18,12 +19,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const speakBtn      = document.getElementById('speak-btn');
   const stopBtn       = document.getElementById('stop-btn');
   const rewindBtn     = document.getElementById('rewind-btn');
+  const downloadBtn   = document.getElementById('download-btn');
   const rateSelect    = document.getElementById('rate-select');
   const resultControls = document.querySelector('.result__controls');
 
   // Сюда кладём текст пересказа, который реально пришёл от модели.
   // Кнопка «Слушать» читает именно его (а не какую-то константу).
   let currentSummaryText = '';
+
+  // Заголовок текущего пересказа (то, что ввёл пользователь). Нужен
+  // для имени файла при скачивании .txt.
+  let currentSummaryTitle = '';
 
   // ----------------------------------------------------------
   // Вспомогательные функции отображения карточки
@@ -38,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // (его повторно сохранять не нужно, иначе появятся дубли).
   function showSummary(title, text, saveToHistory = true) {
     currentSummaryText = text;
+    currentSummaryTitle = title;
     resultTitle.textContent = title;
 
     // Раскладываем текст по словам прямо в #result-text (функция из tts.js).
@@ -71,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // «книга не найдена»). Без кнопок плеера — озвучивать нечего.
   function showMessage(title, message) {
     currentSummaryText = '';
+    currentSummaryTitle = '';
     resultTitle.textContent = title;
 
     // Просто текст, без разбивки по словам.
@@ -89,6 +97,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resultBlock.hidden = false;
     resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+
+  // ----------------------------------------------------------
+  // Этап 13: скачивание пересказа как .txt
+  // ----------------------------------------------------------
+
+  // Превратить заголовок в безопасное имя файла: убираем символы,
+  // которые нельзя в именах файлов (\ / : * ? " < > |), схлопываем
+  // пробелы, обрезаем по длине. Если в итоге пусто — даём запасное имя.
+  function makeFileName(title) {
+    let name = (title || '').trim();
+    name = name.replace(/[\\/:*?"<>|]/g, ' '); // запрещённые символы → пробел
+    name = name.replace(/\s+/g, ' ').trim();    // лишние пробелы схлопываем
+    if (name.length > 80) name = name.slice(0, 80).trim();
+    if (name === '') name = 'Пересказ';
+    return name + '.txt';
+  }
+
+  // Собрать текст в виртуальный файл (Blob) и «нажать» невидимую ссылку,
+  // чтобы браузер скачал его. Заголовок ставим первой строкой текста.
+  function downloadAsTxt() {
+    if (!currentSummaryText) return; // нечего скачивать
+
+    // Первой строкой кладём заголовок, потом пустая строка и сам пересказ.
+    const fileBody = currentSummaryTitle
+      ? currentSummaryTitle + '\n\n' + currentSummaryText
+      : currentSummaryText;
+
+    // Blob — «коробка» с текстом. \uFEFF в начале (BOM) помогает
+    // блокноту Windows правильно распознать кириллицу в UTF-8.
+    const blob = new Blob(['\uFEFF' + fileBody], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    // Создаём невидимую ссылку, кликаем по ней, потом убираем.
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = makeFileName(currentSummaryTitle);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Освобождаем память — ссылка на Blob больше не нужна.
+    URL.revokeObjectURL(url);
   }
 
 
@@ -171,6 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Кнопка «−15 сек» ---
   rewindBtn.addEventListener('click', () => {
     rewind(15);
+  });
+
+  // --- Этап 13: кнопка «Скачать .txt» ---
+  downloadBtn.addEventListener('click', () => {
+    downloadAsTxt();
   });
 
   // --- Селект скорости ---

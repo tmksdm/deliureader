@@ -202,6 +202,14 @@ button.secondary[hidden] {
   display: none;
 }
 
+/* === Этап 13: кнопка «Скачать .txt» — приглушённая, чтобы не
+   конкурировать вниманием с кнопкой «Слушать» === */
+button.secondary#download-btn {
+  color: #6b6b6b;
+  border-color: #c9c3b6;
+  font-weight: 500;
+}
+
 .rate-control {
   position: absolute;
   top: 0;
