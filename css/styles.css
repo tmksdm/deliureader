@@ -20,25 +20,6 @@ body {
   min-height: 100vh;
 }
 
-header {
-  width: 100%;
-  max-width: 480px;
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-header h1 {
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-header p {
-  margin-top: 6px;
-  font-size: 14px;
-  color: #6b6b6b;
-}
-
 main {
   width: 100%;
   max-width: 480px;
@@ -253,10 +234,13 @@ button.secondary[hidden] {
   min-height: 36px;
 }
 
-/* ===== Этап 7: шапка с шестерёнкой и окно настроек ===== */
+/* ===== Этап 7 / 11: шапка ===== */
 
-/* Шапка: заголовок слева, шестерёнка справа */
+/* Шапка: заголовок слева, кнопки в ряд справа */
 header {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 32px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -265,9 +249,30 @@ header {
 
 .header__titles {
   flex: 1;
+  text-align: left;
 }
 
-/* Кнопка-иконка (шестерёнка, крестик) */
+header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+header p {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #6b6b6b;
+}
+
+/* Кнопки шапки — в горизонтальный ряд с зазором */
+.header__actions {
+  flex: none;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+/* Кнопка-иконка (книжки, шестерёнка, крестик) */
 .icon-btn {
   flex: none;
   width: 40px;
@@ -381,3 +386,174 @@ header {
   display: none;
 }
 
+/* ===== Этап 11: раздел «История» ===== */
+
+.history {
+  margin-top: 24px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e0d5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.history[hidden] {
+  display: none;
+}
+
+.history__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.history__title {
+  margin: 0;
+  color: #1a2a4a;
+  font-size: 1.25rem;
+}
+
+/* Панель массовых действий */
+.history__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.history__toolbar[hidden] {
+  display: none;
+}
+
+.history__selectall {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #6b6b6b;
+  cursor: pointer;
+}
+
+.history__selectall input {
+  width: 18px;
+  height: 18px;
+}
+
+/* Кнопка опасного действия (удалить) */
+button.danger {
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #b3261e;
+  background: #ffffff;
+  border: 1px solid #b3261e;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+button.danger:active {
+  opacity: 0.7;
+}
+
+button.danger:disabled {
+  color: #c9a3a0;
+  border-color: #e3c7c5;
+  cursor: default;
+}
+
+/* Сообщение «история пуста» */
+.history__empty {
+  font-size: 0.95rem;
+  color: #6b6b6b;
+  line-height: 1.5;
+}
+
+.history__empty[hidden] {
+  display: none;
+}
+
+/* Список пересказов */
+.history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Одна запись истории */
+.history__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #faf8f3;
+  border: 1px solid #e5e0d5;
+  border-radius: 12px;
+}
+
+.history__check {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+/* Кликабельная часть записи — открывает пересказ */
+.history__open {
+  flex: 1;
+  min-width: 0;            /* чтобы длинный текст обрезался, а не распирал строку */
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.history__open:active {
+  opacity: 0.6;
+}
+
+.history__query {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #1a2a4a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history__date {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: #8a8170;
+}
+
+/* Крестик удаления одной записи */
+.history__delete {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  font-size: 1.1rem;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #b3261e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history__delete:active {
+  opacity: 0.5;
+}
