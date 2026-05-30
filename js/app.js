@@ -6,6 +6,7 @@
 // Этап 7: экран настроек — API-ключ OpenRouter и выбор модели.
 // Этап 10: реальная генерация — ввод → LLM → пересказ → озвучка.
 // Этап 10.4: панель кнопок закреплена внизу, пока показан пересказ.
+// Этап 11: успешный пересказ автоматически сохраняется в историю.
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
@@ -30,7 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Показать в карточке настоящий пересказ: раскладываем по словам
   // (для подсветки и тапа), показываем кнопки плеера.
-  function showSummary(title, text) {
+  //
+  // Этап 11: третий аргумент saveToHistory — нужно ли сохранять пересказ
+  // в историю. true (по умолчанию) — для свежих пересказов от модели;
+  // false — когда мы открываем УЖЕ сохранённый пересказ из истории
+  // (его повторно сохранять не нужно, иначе появятся дубли).
+  function showSummary(title, text, saveToHistory = true) {
     currentSummaryText = text;
     resultTitle.textContent = title;
 
@@ -54,6 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Сбрасываем кнопки плеера в исходное состояние.
     updatePlayerUI({ isPlaying: false, isPaused: false });
+
+    // Этап 11: сохраняем свежий пересказ в историю.
+    if (saveToHistory) {
+      addHistoryItem(title, text);
+    }
   }
 
   // Показать в карточке простое сообщение (загрузка / ошибка /
@@ -117,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Всё хорошо — показываем настоящий пересказ с плеером.
+      // Третий аргумент по умолчанию true → пересказ сохранится в историю.
       showSummary(query, summary);
 
     } catch (err) {
