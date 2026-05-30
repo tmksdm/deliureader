@@ -100,12 +100,14 @@ function highlightWordAt(charIndex) {
   const span = ttsState.wordSpans[targetIndex];
   span.classList.add('word--active');
 
-  const rect = span.getBoundingClientRect();
-  const viewportH = window.innerHeight;
-  if (rect.top < 80 || rect.bottom > viewportH - 80) {
-    span.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  // Этап 10.2: держим читаемое слово всегда примерно по центру экрана.
+  // Раньше скроллили только когда слово ушло за край — из-за этого оно
+  // ныряло под нижнюю панель, потом подскакивало и снова исчезало.
+  // Теперь подтягиваем к центру всегда и плавно: центр заведомо выше
+  // панели, поэтому слово под кнопки больше не попадёт.
+  span.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
+
 
 // ---------- Эмуляция подсветки по таймеру ----------
 // Нужна для Android Chrome, где onboundary не работает.
