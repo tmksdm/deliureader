@@ -4,12 +4,7 @@
 // Этап 5: озвучка через Web Speech API.
 // Этап 6: полноценный плеер — пауза/стоп/скорость/перемотка/тап по слову.
 // Этап 7: экран настроек — API-ключ OpenRouter и выбор модели.
-
-const FAKE_SUMMARY = `Это тестовый пересказ. Настоящий текст будет приходить от языковой модели позже, на этапе 10. Сейчас наша задача — убедиться, что кнопка работает, текст появляется на экране, а блок с результатом выглядит аккуратно.
-
-Представь, что здесь идёт спокойный устный рассказ о произведении: автор, время создания, главные герои, ключевые события и темы. Текст написан сплошными абзацами, без списков и заголовков, потому что позже он пойдёт прямо в синтезатор речи — браузер будет читать его вслух.
-
-На этом этапе не важно, какую книгу ты ввёл в поле — ответ всегда один и тот же. Это нормально. Главное — что весь путь нажал кнопку, увидел текст работает от начала до конца.`;
+// Этап 10: реальная генерация — ввод → LLM → пересказ → озвучка.
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
@@ -17,13 +12,60 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultBlock  = document.getElementById('result');
   const resultText   = document.getElementById('result-text');
   const resultTitle  = document.getElementById('result-title');
-  const speakBtn     = document.getElementById('speak-btn');
-  const stopBtn      = document.getElementById('stop-btn');
-  const rewindBtn    = document.getElementById('rewind-btn');
-  const rateSelect   = document.getElementById('rate-select');
+  const speakBtn      = document.getElementById('speak-btn');
+  const stopBtn       = document.getElementById('stop-btn');
+  const rewindBtn     = document.getElementById('rewind-btn');
+  const rateSelect    = document.getElementById('rate-select');
+  const resultControls = document.querySelector('.result__controls');
 
-  // --- Этап 4: показать фиктивный пересказ ---
-  generateBtn.addEventListener('click', () => {
+  // Сюда кладём текст пересказа, который реально пришёл от модели.
+  // Кнопка «Слушать» читает именно его (а не какую-то константу).
+  let currentSummaryText = '';
+
+  // ----------------------------------------------------------
+  // Вспомогательные функции отображения карточки
+  // ----------------------------------------------------------
+
+  // Показать в карточке настоящий пересказ: раскладываем по словам
+  // (для подсветки и тапа), показываем кнопки плеера.
+  function showSummary(title, text) {
+    currentSummaryText = text;
+    resultTitle.textContent = title;
+
+    // Раскладываем текст по словам прямо в #result-text (функция из tts.js).
+    renderText(text, resultText);
+
+    // Кнопки плеера нужны — показываем панель управления.
+    resultControls.hidden = false;
+
+    resultBlock.hidden = false;
+    resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Сбрасываем кнопки плеера в исходное состояние.
+    updatePlayerUI({ isPlaying: false, isPaused: false });
+  }
+
+  // Показать в карточке простое сообщение (загрузка / ошибка /
+  // «книга не найдена»). Без кнопок плеера — озвучивать нечего.
+  function showMessage(title, message) {
+    currentSummaryText = '';
+    resultTitle.textContent = title;
+
+    // Просто текст, без разбивки по словам.
+    resultText.textContent = message;
+
+    // Прячем панель плеера — здесь нечего слушать.
+    resultControls.hidden = true;
+
+    resultBlock.hidden = false;
+    resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ----------------------------------------------------------
+  // Этап 10: главная кнопка «Получить пересказ» → реальный запрос
+  // ----------------------------------------------------------
+
+  generateBtn.addEventListener('click', async () => {
     const query = queryInput.value.trim();
 
     if (query === '') {
@@ -34,16 +76,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Если до этого что-то читалось — остановить.
     if (typeof stop === 'function') stop();
 
-    resultTitle.textContent = query;
+    // Блокируем кнопку и показываем состояние загрузки,
+    // чтобы человек не жал её повторно, пока модель думает.
+    generateBtn.disabled = true;
+    const originalBtnText = generateBtn.textContent;
+    generateBtn.textContent = 'Готовлю пересказ…';
+    showMessage(query, 'Готовлю пересказ, это займёт несколько секунд…');
 
-    // Раскладываем текст по словам прямо в #result-text (функция из tts.js).
-    renderText(FAKE_SUMMARY, resultText);
+    try {
+      // Идём в модель. systemPrompt — наш «литературовед» из prompts.js,
+      // query — то, что ввёл пользователь.
+      const summary = await requestSummary(LITERATURE_SYSTEM_PROMPT, query);
 
-    resultBlock.hidden = false;
-    resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Особый случай: модель не опознала произведение и вернула
+      // ровно метку BOOK_NOT_FOUND. Показываем дружелюбный текст,
+      // а не сам код.
+      if (summary.trim() === 'BOOK_NOT_FOUND') {
+        showMessage(query, 'Не нашёл такое произведение. Проверь, правильно ли указаны автор и название.');
+        return;
+      }
 
-    // Сбрасываем кнопки в исходное состояние.
-    updatePlayerUI({ isPlaying: false, isPaused: false });
+      // Всё хорошо — показываем настоящий пересказ с плеером.
+      showSummary(query, summary);
+
+    } catch (err) {
+      // Любая ошибка из api.js приходит как Error с кодом-меткой.
+      // Переводим её в человеческий текст и показываем в карточке.
+      console.error('Ошибка генерации:', err);
+      showMessage(query, describeApiError(err.message));
+
+    } finally {
+      // Что бы ни случилось — возвращаем кнопку в рабочее состояние.
+      generateBtn.disabled = false;
+      generateBtn.textContent = originalBtnText;
+    }
   });
 
   // --- Этап 6: главная кнопка «Слушать ↔ Пауза ↔ Возобновить» ---
@@ -52,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!state.isPlaying) {
       // Ничего не читается — стартуем с начала текста.
-      speak(FAKE_SUMMARY, resultText);
+      speak(currentSummaryText, resultText);
     } else if (state.isPaused) {
       // Стоит на паузе — продолжаем.
       resume();

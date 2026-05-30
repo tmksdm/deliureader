@@ -153,6 +153,10 @@ button.primary:active {
   min-height: 44px;
 }
 
+.result__controls[hidden] {
+  display: none;
+}
+
 .result__buttons {
   display: flex;
   flex-wrap: wrap;
