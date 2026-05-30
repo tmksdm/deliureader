@@ -693,4 +693,7 @@ button.danger:disabled {
 /* Этап 15: кнопка «Удалить выбранные» в режиме подтверждения. */
 .danger.danger--confirming {
   background: #a5281b;
+  border-color: #a5281b;
+  color: #fff;
 }
+

@@ -4,7 +4,7 @@
 // кэш удаляется, браузер скачивает всё заново.
 
 // ВАЖНО: при каждом обновлении CSS/JS увеличивай это число на 1.
-const CACHE_VERSION = 9;
+const CACHE_VERSION = 10;
 const CACHE_NAME = 'deliu-cache-v' + CACHE_VERSION;
 
 // Базовый путь проекта на GitHub Pages.
