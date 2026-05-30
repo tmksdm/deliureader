@@ -5,6 +5,7 @@
 // Этап 6: полноценный плеер — пауза/стоп/скорость/перемотка/тап по слову.
 // Этап 7: экран настроек — API-ключ OpenRouter и выбор модели.
 // Этап 10: реальная генерация — ввод → LLM → пересказ → озвучка.
+// Этап 10.4: панель кнопок закреплена внизу, пока показан пересказ.
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
@@ -42,6 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Этап 10.3: показываем предупреждение о возможных ошибках нейросети.
     resultDisclaimer.hidden = false;
 
+    // Этап 10.4: панель кнопок закрепляем внизу экрана сразу, как только
+    // показан пересказ, — чтобы «Слушать» был под рукой и не надо было
+    // листать весь текст вниз.
+    resultControls.classList.add('result__controls--floating');
+    document.body.classList.add('is-playing');
+
     resultBlock.hidden = false;
     resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -63,6 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Этап 10.3: на загрузке/ошибке/«не найдено» предупреждение ни к чему.
     resultDisclaimer.hidden = true;
+
+    // Этап 10.4: снимаем закрепление панели и запас снизу —
+    // в режиме сообщения панели нет.
+    resultControls.classList.remove('result__controls--floating');
+    document.body.classList.remove('is-playing');
 
     resultBlock.hidden = false;
     resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -181,17 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
       stopBtn.hidden = true;
       rewindBtn.hidden = true;
     }
-
-    // Этап 10.1: во время чтения (играет ИЛИ на паузе) прилепляем
-    // панель кнопок к низу экрана, чтобы до неё всегда можно было
-    // дотянуться. Когда чтение остановлено — возвращаем в карточку.
-    if (state.isPlaying) {
-      resultControls.classList.add('result__controls--floating');
-      document.body.classList.add('is-playing');
-    } else {
-      resultControls.classList.remove('result__controls--floating');
-      document.body.classList.remove('is-playing');
-    }
+    // Этап 10.4: закрепление панели внизу больше НЕ зависит от состояния
+    // плеера — оно включается в showSummary и держится, пока виден пересказ.
   }
 
 
