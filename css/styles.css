@@ -878,3 +878,69 @@ html[data-theme="dark"] body {
   border-color: #2f5a3a;
   color: #a7e0b5;
 }
+
+
+/* ========================================================
+   Этап 15 (часть 6): АДАПТИВ ПОД УЗКИЕ ЭКРАНЫ (≤360px)
+   Включается только на маленьких телефонах. На обычных
+   и широких экранах ничего из этого не применяется —
+   весь CSS выше остаётся как есть.
+   ======================================================== */
+@media (max-width: 360px) {
+
+  /* Возвращаем полезную ширину: боковые поля тоньше */
+  body {
+    padding: 18px 10px;
+  }
+
+  /* Заголовок чуть меньше, чтобы не толкал кнопки шапки */
+  header h1 {
+    font-size: 21px;
+  }
+  header p {
+    font-size: 13px;
+  }
+
+  /* Иконки шапки чуть компактнее и плотнее друг к другу */
+  .header__actions {
+    gap: 6px;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+  }
+
+  /* Карточки result/history: тоньше внутренние поля = шире текст */
+  .result,
+  .history {
+    padding: 16px 14px;
+  }
+
+  /* Кнопки плеера: чуть компактнее, чтобы две в ряд помещались уверенно */
+  button.secondary {
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+
+  /* Плавающая панель: ужимаем боковые поля и резерв под селект,
+     отдаём место кнопкам */
+  .result__controls--floating {
+    padding-left: 10px;
+    padding-right: 78px;
+  }
+  .result__controls--floating .rate-control {
+    right: 10px;
+  }
+
+  /* Селект скорости компактнее */
+  .rate-control select {
+    padding: 8px 24px 8px 8px;
+    font-size: 12px;
+  }
+
+  /* В модалке настроек тоже ужимаем поля */
+  .modal__box {
+    padding: 16px 14px;
+  }
+}
