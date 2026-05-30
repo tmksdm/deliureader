@@ -6,7 +6,7 @@
 // Этап 7: экран настроек — API-ключ OpenRouter и выбор модели.
 // Этап 10: реальная генерация — ввод → LLM → пересказ → озвучка.
 // Этап 10.4: панель кнопок закреплена внизу, пока показан пересказ.
-// Этап 11: успешный пересказ автоматически сохраняется в историю.
+// Этап 11: история пересказов — автосохранение, список, открытие, удаление.
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
@@ -103,6 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Введи автора и название книги.');
       return;
     }
+
+    // Если открыта история — спрятать её, показываем результат.
+    hideHistory();
 
     // Если до этого что-то читалось — остановить.
     if (typeof stop === 'function') stop();
@@ -208,6 +211,166 @@ document.addEventListener('DOMContentLoaded', () => {
     // Этап 10.4: закрепление панели внизу больше НЕ зависит от состояния
     // плеера — оно включается в showSummary и держится, пока виден пересказ.
   }
+
+
+  // ========================================================
+  // --- Этап 11: раздел «История» ---
+  // ========================================================
+
+  const historyBtn            = document.getElementById('history-btn');
+  const historyBlock          = document.getElementById('history');
+  const historyClose          = document.getElementById('history-close');
+  const historyList           = document.getElementById('history-list');
+  const historyEmpty          = document.getElementById('history-empty');
+  const historyToolbar        = document.getElementById('history-toolbar');
+  const historySelectAll      = document.getElementById('history-select-all');
+  const historyDeleteSelected = document.getElementById('history-delete-selected');
+
+  // Превратить метку времени в человекочитаемую дату вида «28.05.2026, 15:06».
+  function formatDate(ms) {
+    try {
+      return new Date(ms).toLocaleString('ru-RU', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // Перерисовать список истории целиком из localStorage.
+  function renderHistory() {
+    const items = getHistory();
+
+    // Чистим список перед новой отрисовкой.
+    historyList.innerHTML = '';
+
+    // Если истории нет — показываем заглушку и прячем панель действий.
+    if (items.length === 0) {
+      historyEmpty.hidden = false;
+      historyToolbar.hidden = true;
+      return;
+    }
+    historyEmpty.hidden = true;
+    historyToolbar.hidden = false;
+
+    // Строим по записи на каждый сохранённый пересказ.
+    items.forEach((item) => {
+      const li = document.createElement('li');
+      li.className = 'history__item';
+      li.dataset.id = item.id;
+
+      // Галочка для массового выбора.
+      const check = document.createElement('input');
+      check.type = 'checkbox';
+      check.className = 'history__check';
+      check.addEventListener('change', updateSelectAllState);
+
+      // Кликабельная середина — открывает пересказ.
+      const open = document.createElement('button');
+      open.type = 'button';
+      open.className = 'history__open';
+
+      const query = document.createElement('div');
+      query.className = 'history__query';
+      query.textContent = item.query || '(без названия)';
+
+      const date = document.createElement('div');
+      date.className = 'history__date';
+      date.textContent = formatDate(item.createdAt);
+
+      open.appendChild(query);
+      open.appendChild(date);
+      open.addEventListener('click', () => openHistoryItem(item.id));
+
+      // Крестик — удалить одну запись.
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'history__delete';
+      del.setAttribute('aria-label', 'Удалить пересказ');
+      del.textContent = '✕';
+      del.addEventListener('click', () => deleteOne(item.id, item.query));
+
+      li.appendChild(check);
+      li.appendChild(open);
+      li.appendChild(del);
+      historyList.appendChild(li);
+    });
+
+    // Сбрасываем «Выбрать все» в исходное и обновляем доступность кнопки удаления.
+    historySelectAll.checked = false;
+    updateSelectAllState();
+  }
+
+  // Показать раздел «История» (прячем карточку результата).
+  function openHistory() {
+    if (typeof stop === 'function') stop(); // остановить чтение, если шло
+    resultBlock.hidden = true;
+    document.body.classList.remove('is-playing'); // снять запас снизу
+    renderHistory();
+    historyBlock.hidden = false;
+    historyBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Спрятать раздел «История».
+  function hideHistory() {
+    historyBlock.hidden = true;
+  }
+
+  // Открыть сохранённый пересказ из истории в обычной карточке.
+  // saveToHistory = false — повторно в историю НЕ кладём.
+  function openHistoryItem(id) {
+    const item = getHistoryItem(id);
+    if (!item) return;
+    hideHistory();
+    showSummary(item.query, item.text, false);
+  }
+
+  // Собрать id всех отмеченных галочками записей.
+  function getCheckedIds() {
+    const ids = [];
+    historyList.querySelectorAll('.history__item').forEach((li) => {
+      const check = li.querySelector('.history__check');
+      if (check && check.checked) ids.push(li.dataset.id);
+    });
+    return ids;
+  }
+
+  // Обновить состояние галочки «Выбрать все» и доступность кнопки удаления.
+  function updateSelectAllState() {
+    const checkedCount = getCheckedIds().length;
+    historyDeleteSelected.disabled = checkedCount === 0;
+  }
+
+  // Удалить одну запись (крестик) — с подтверждением.
+  function deleteOne(id, query) {
+    const label = query ? `«${query}»` : 'этот пересказ';
+    if (!confirm(`Удалить ${label}?`)) return;
+    deleteHistoryItem(id);
+    renderHistory();
+  }
+
+  // «Выбрать все» — отметить/снять все галочки.
+  historySelectAll.addEventListener('change', () => {
+    const checked = historySelectAll.checked;
+    historyList.querySelectorAll('.history__check').forEach((c) => {
+      c.checked = checked;
+    });
+    updateSelectAllState();
+  });
+
+  // «Удалить выбранные» — пачкой, с подтверждением.
+  historyDeleteSelected.addEventListener('click', () => {
+    const ids = getCheckedIds();
+    if (ids.length === 0) return;
+    if (!confirm(`Удалить выбранные пересказы (${ids.length})?`)) return;
+    deleteHistoryItems(ids);
+    renderHistory();
+  });
+
+  // Открыть/закрыть раздел истории по иконке и крестику.
+  historyBtn.addEventListener('click', openHistory);
+  historyClose.addEventListener('click', hideHistory);
 
 
   // ========================================================
