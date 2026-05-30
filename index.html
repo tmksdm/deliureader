@@ -19,7 +19,10 @@
       <h1>DeliuReader</h1>
       <p>Аудиопересказ до 10 минут</p>
     </div>
-    <button class="icon-btn" id="settings-btn" type="button" aria-label="Настройки" title="Настройки">⚙</button>
+    <div class="header__actions">
+      <button class="icon-btn" id="history-btn" type="button" aria-label="История" title="История">📚</button>
+      <button class="icon-btn" id="settings-btn" type="button" aria-label="Настройки" title="Настройки">⚙</button>
+    </div>
   </header>
 
   <main>
@@ -59,6 +62,26 @@
         </label>
       </div>
 
+    </section>
+
+    <!-- Этап 11: раздел «История» -->
+    <section id="history" class="history" hidden>
+      <div class="history__head">
+        <h2 class="history__title">История</h2>
+        <button class="icon-btn" id="history-close" type="button" aria-label="Закрыть историю">✕</button>
+      </div>
+
+      <div class="history__toolbar" id="history-toolbar">
+        <label class="history__selectall">
+          <input type="checkbox" id="history-select-all">
+          Выбрать все
+        </label>
+        <button class="danger" id="history-delete-selected" type="button">Удалить выбранные</button>
+      </div>
+
+      <p class="history__empty" id="history-empty" hidden>Здесь пока пусто. Сделай первый пересказ — он сохранится сюда.</p>
+
+      <ul class="history__list" id="history-list"></ul>
     </section>
 
   </main>
