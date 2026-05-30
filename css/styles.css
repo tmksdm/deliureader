@@ -364,4 +364,19 @@ header {
   margin-top: 18px;
 }
 
+/* === Этап 10.3: предупреждение о возможных ошибках нейросети === */
+.result__disclaimer {
+  margin-top: 16px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #8a6d1f;
+  background: #fdf6e3;
+  border: 1px solid #ecd9a0;
+  border-radius: 10px;
+}
+
+.result__disclaimer[hidden] {
+  display: none;
+}
 

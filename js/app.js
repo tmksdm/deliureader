@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const generateBtn  = document.getElementById('generate-btn');
   const resultBlock  = document.getElementById('result');
   const resultText   = document.getElementById('result-text');
+  const resultDisclaimer = document.getElementById('result-disclaimer');
   const resultTitle  = document.getElementById('result-title');
   const speakBtn      = document.getElementById('speak-btn');
   const stopBtn       = document.getElementById('stop-btn');
@@ -38,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Кнопки плеера нужны — показываем панель управления.
     resultControls.hidden = false;
 
+    // Этап 10.3: показываем предупреждение о возможных ошибках нейросети.
+    resultDisclaimer.hidden = false;
+
     resultBlock.hidden = false;
     resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -57,9 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Прячем панель плеера — здесь нечего слушать.
     resultControls.hidden = true;
 
+    // Этап 10.3: на загрузке/ошибке/«не найдено» предупреждение ни к чему.
+    resultDisclaimer.hidden = true;
+
     resultBlock.hidden = false;
     resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+
 
   // ----------------------------------------------------------
   // Этап 10: главная кнопка «Получить пересказ» → реальный запрос
