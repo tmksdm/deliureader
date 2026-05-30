@@ -121,6 +121,21 @@
   <script src="js/prompts.js" defer></script>
   <script src="js/app.js" defer></script>
 
+  <!-- Этап 12: регистрация Service Worker для офлайн-доступа -->
+  <script>
+    // Регистрируем привратника, только если браузер его поддерживает.
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then((reg) => {
+            console.log('SW: зарегистрирован, scope =', reg.scope);
+          })
+          .catch((err) => {
+            console.log('SW: ошибка регистрации', err);
+          });
+      });
+    }
+  </script>
 
 </body>
 </html>
