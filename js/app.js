@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultDisclaimer = document.getElementById('result-disclaimer');
   const resultTitle  = document.getElementById('result-title');
   const speakBtn      = document.getElementById('speak-btn');
+  const ttsWarning    = document.getElementById('tts-warning'); // Этап 15: плашка о недоступности озвучки
   const stopBtn       = document.getElementById('stop-btn');
   const rewindBtn     = document.getElementById('rewind-btn');
   const downloadBtn   = document.getElementById('download-btn');
@@ -66,6 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
     resultBlock.hidden = false;
     resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+    // Этап 15: проверяем, доступна ли озвучка, и настраиваем кнопку/плашку.
+    refreshTtsAvailability();
+
+
     // Сбрасываем кнопки плеера в исходное состояние.
     updatePlayerUI({ isPlaying: false, isPaused: false });
 
@@ -91,6 +96,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Этап 10.3: на загрузке/ошибке/«не найдено» предупреждение ни к чему.
     resultDisclaimer.hidden = true;
 
+
+    // Этап 15: в режиме сообщения плеера нет — прячем и плашку про озвучку.
+    ttsWarning.hidden = true;
+    ttsWarning.textContent = '';
+
+
     // Этап 10.4: снимаем закрепление панели и запас снизу —
     // в режиме сообщения панели нет.
     resultControls.classList.remove('result__controls--floating');
@@ -98,6 +109,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resultBlock.hidden = false;
     resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+
+  // ----------------------------------------------------------
+  // Этап 15: доступность озвучки — плашка + дизейбл кнопки «Слушать»
+  // ----------------------------------------------------------
+
+  // Спросить у tts.js, можно ли озвучивать, и привести интерфейс
+  // в соответствие: если нельзя — гасим «▶ Слушать» и показываем
+  // спокойную плашку с причиной; если можно — кнопка активна, плашки нет.
+  function refreshTtsAvailability() {
+    const { ok, reason } = getTtsAvailability();
+
+    if (ok) {
+      speakBtn.disabled = false;
+      speakBtn.title = '';
+      ttsWarning.hidden = true;
+      ttsWarning.textContent = '';
+    } else {
+      speakBtn.disabled = true;
+      speakBtn.title = reason;        // подсказка при наведении на серую кнопку
+      ttsWarning.textContent = reason;
+      ttsWarning.hidden = false;
+    }
   }
 
 
@@ -563,6 +598,20 @@ document.addEventListener('DOMContentLoaded', () => {
   loadRequiredBooks().then((books) => {
     requiredBooks = books;
   });
+
+
+  // Этап 15: голоса синтезатора иногда приезжают с задержкой. Когда они
+  // догрузятся — перепроверяем доступность озвучки (вдруг русский голос
+  // появился). Если карточка пересказа сейчас открыта — плашка и кнопка
+  // обновятся сами.
+  if (typeof onVoicesReady === 'function') {
+    onVoicesReady(() => {
+      if (!resultBlock.hidden && currentSummaryText) {
+        refreshTtsAvailability();
+      }
+    });
+  }
+
 
   // Привести строку к «поисковому» виду: нижний регистр, без точек,
   // лишние пробелы схлопнуты. Чтобы «достоевский» находил «Ф.М. Достоевский»,

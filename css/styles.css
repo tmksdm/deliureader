@@ -394,6 +394,36 @@ header p {
   display: none;
 }
 
+
+/* === Этап 15: плашка о недоступности озвучки + неактивная «Слушать» === */
+
+/* По стилю похожа на дисклеймер, но в спокойно-серых тонах: это не ошибка
+   нейросети, а просто сообщение, что озвучить нечем в этом браузере. */
+.result__tts-warning {
+  margin: 4px 0 16px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #5a5a5a;
+  background: #f1efe9;
+  border: 1px solid #ddd8cc;
+  border-radius: 10px;
+}
+
+.result__tts-warning[hidden] {
+  display: none;
+}
+
+/* Когда озвучка недоступна, кнопка «▶ Слушать» гаснет: серая, без курсора. */
+button.secondary:disabled {
+  color: #a8a8a8;
+  border-color: #d8d4cb;
+  background: #f5f3ee;
+  cursor: default;
+  opacity: 1;            /* перебиваем :active opacity, чтобы не «мигала» при тапе */
+}
+
+
 /* ===== Этап 11: раздел «История» ===== */
 
 .history {

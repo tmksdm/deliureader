@@ -169,13 +169,16 @@ function startUtteranceFrom(offset) {
   }
 
   if (!russianVoice) {
-    alert('В твоём браузере нет русского голоса для озвучки. ' +
-          'Открой сайт в другом браузере (например, Chrome) или используй телефон.');
+    // Этап 15: больше не показываем alert. О недоступности озвучки
+    // app.js предупреждает заранее плашкой и гасит кнопку «Слушать».
+    // Здесь просто молча не запускаемся.
+    console.warn('TTS: русский голос недоступен, озвучка не запущена');
     ttsState.isPlaying = false;
     ttsState.isPaused = false;
     notifyStateChange();
     return false;
   }
+
 
   window.speechSynthesis.cancel();
   stopHighlightTimer();
@@ -250,10 +253,12 @@ function startUtteranceFrom(offset) {
 
 function speak(text, container) {
   if (!('speechSynthesis' in window)) {
-    alert('Твой браузер не умеет озвучивать текст. Попробуй другой браузер.');
+    // Этап 15: без alert — app.js уже предупредил плашкой и погасил кнопку.
+    console.warn('TTS: speechSynthesis недоступен');
     return false;
   }
   if (!text || !text.trim()) return false;
+
 
   if (text !== ttsState.fullText || container !== ttsState.container) {
     renderText(text, container);
@@ -354,4 +359,59 @@ function getTtsState() {
     isPlaying: ttsState.isPlaying,
     isPaused: ttsState.isPaused,
   };
+}
+
+
+// ---------- Этап 15: проверка доступности озвучки ----------
+// Вызывается из app.js при показе пересказа, ДО клика по «Слушать».
+// Возвращает { ok, reason } — можно ли озвучивать и, если нет, почему.
+// reason пойдёт в плашку под текстом понятным пользователю языком.
+function getTtsAvailability() {
+  if (!('speechSynthesis' in window)) {
+    return {
+      ok: false,
+      reason: 'Этот браузер не умеет озвучивать текст. ' +
+              'Откройте сайт в Chrome — там озвучка работает.'
+    };
+  }
+
+  // Подтянем голоса, если ещё не загружены.
+  if (cachedVoices.length === 0) {
+    cachedVoices = window.speechSynthesis.getVoices();
+  }
+
+  // Голоса бывают подгружаются с задержкой. Если их пока вообще нет —
+  // не спешим объявлять озвучку недоступной: считаем, что «пока ок»,
+  // app.js перепроверит позже (см. onvoiceschanged ниже).
+  if (cachedVoices.length === 0) {
+    return { ok: true, reason: '' };
+  }
+
+  // Голоса есть, но русского среди них нет — английским читать русский
+  // текст бессмысленно.
+  if (!pickRussianVoice()) {
+    return {
+      ok: false,
+      reason: 'В этом браузере нет русского голоса для озвучки. ' +
+              'Откройте сайт в Chrome или установите русский голос ' +
+              'в настройках системы.'
+    };
+  }
+
+  return { ok: true, reason: '' };
+}
+
+// Этап 15: позволяем app.js подписаться на загрузку голосов, чтобы
+// перепроверить доступность озвучки, когда список голосов догрузится.
+function onVoicesReady(callback) {
+  if (!('speechSynthesis' in window)) return;
+  if (cachedVoices.length > 0) {
+    callback();
+    return;
+  }
+  window.speechSynthesis.addEventListener('voiceschanged', function handler() {
+    window.speechSynthesis.removeEventListener('voiceschanged', handler);
+    loadVoices();
+    callback();
+  });
 }
