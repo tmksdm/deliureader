@@ -9,10 +9,12 @@
 // Этап 11: история пересказов — автосохранение, список, открытие, удаление.
 // Этап 13: скачивание пересказа как .txt.
 // Этап 14: автоподсказки из списка книг ВГИК.
+// Этап 15: inline-сообщения вместо alert (часть 2).
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
   const generateBtn  = document.getElementById('generate-btn');
+  const queryError   = document.getElementById('query-error'); // Этап 15: плашка ошибки под полем
   const resultBlock  = document.getElementById('result');
   const resultText   = document.getElementById('result-text');
   const resultDisclaimer = document.getElementById('result-disclaimer');
@@ -32,6 +34,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Заголовок текущего пересказа (то, что ввёл пользователь). Нужен
   // для имени файла при скачивании .txt.
   let currentSummaryTitle = '';
+
+  // ----------------------------------------------------------
+  // Этап 15: inline-сообщение об ошибке под полем запроса
+  // ----------------------------------------------------------
+
+  // Показать спокойную плашку вместо системного alert.
+  function showQueryError(message) {
+    queryError.textContent = message;
+    queryError.hidden = false;
+  }
+
+  // Спрятать плашку (когда человек начал печатать или ошибка исправлена).
+  function hideQueryError() {
+    queryError.hidden = true;
+    queryError.textContent = '';
+  }
 
   // ----------------------------------------------------------
   // Вспомогательные функции отображения карточки
@@ -188,9 +206,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const query = queryInput.value.trim();
 
     if (query === '') {
-      alert('Введи автора и название книги.');
+      // Этап 15: вместо alert — спокойная плашка под полем.
+      showQueryError('Введи автора и название книги.');
       return;
     }
+
+    // Запрос корректный — прячем плашку ошибки, если она была.
+    hideQueryError();
 
     // Если открыта история — спрятать её, показываем результат.
     hideHistory();
@@ -672,8 +694,11 @@ document.addEventListener('DOMContentLoaded', () => {
     suggestionsBox.hidden = false;
   }
 
-  // Набор текста в поле → пересобираем подсказки.
-  queryInput.addEventListener('input', renderSuggestions);
+  // Набор текста в поле → пересобираем подсказки + прячем плашку ошибки.
+  queryInput.addEventListener('input', () => {
+    hideQueryError(); // Этап 15: начал печатать — убираем сообщение об ошибке
+    renderSuggestions();
+  });
 
   // Фокус на поле → если там уже что-то есть, сразу показать подсказки.
   queryInput.addEventListener('focus', renderSuggestions);

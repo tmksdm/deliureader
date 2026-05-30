@@ -643,3 +643,16 @@ button.danger:disabled {
 .suggestions__item:active {
   background: #f5f3ee;
 }
+
+/* Этап 15: inline-сообщение об ошибке под полем запроса.
+   Спокойная плашка вместо системного alert. */
+.inline-error {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  background: #fcefe9;
+  border: 1px solid #e6c3b3;
+  border-radius: 10px;
+  color: #9a4a2a;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
