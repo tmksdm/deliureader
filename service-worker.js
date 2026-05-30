@@ -4,7 +4,7 @@
 // кэш удаляется, браузер скачивает всё заново.
 
 // ВАЖНО: при каждом обновлении CSS/JS увеличивай это число на 1.
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 const CACHE_NAME = 'deliu-cache-v' + CACHE_VERSION;
 
 // Базовый путь проекта на GitHub Pages.
@@ -22,6 +22,7 @@ const APP_SHELL = [
   BASE + 'js/prompts.js',
   BASE + 'js/app.js',
   BASE + 'data/models.json',
+  BASE + 'data/required-books.json',
   BASE + 'icons/icon-192.png',
   BASE + 'icons/icon-512.png'
 ];

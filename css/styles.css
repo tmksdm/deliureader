@@ -565,3 +565,48 @@ button.danger:disabled {
 .history__delete:active {
   opacity: 0.5;
 }
+
+
+/* ========================================================
+   Этап 14: автоподсказки из списка книг ВГИК
+   ======================================================== */
+
+/* Обёртка поля ввода становится точкой отсчёта для выпадающего списка:
+   список позиционируется относительно неё (position: absolute ниже). */
+.field--query {
+  position: relative;
+}
+
+/* Сам выпадающий список подсказок. Висит поверх страницы, привязан
+   к низу поля ввода, не раздвигает разметку. */
+.suggestions {
+  list-style: none;        /* убираем маркеры списка */
+  margin: 4px 0 0;
+  padding: 4px;
+  position: absolute;      /* «висит» над остальным содержимым */
+  left: 0;
+  right: 0;
+  z-index: 20;             /* выше карточки результата */
+  background: #ffffff;
+  border: 1px solid #e5e0d5;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(26, 42, 74, 0.12);
+  max-height: 320px;       /* если совпадений много — список прокручивается */
+  overflow-y: auto;
+}
+
+/* Одна строка-подсказка. */
+.suggestions__item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #1a2a4a;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+/* Подсветка строки под курсором / при касании. */
+.suggestions__item:hover,
+.suggestions__item:active {
+  background: #f5f3ee;
+}

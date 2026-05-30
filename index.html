@@ -26,10 +26,12 @@
   </header>
 
   <main>
-    <div class="field">
+    <div class="field field--query">
       <label for="query">Автор и название</label>
       <input id="query" type="text" placeholder="Достоевский Преступление и наказание" autocomplete="off">
+      <ul id="suggestions" class="suggestions" hidden></ul>
     </div>
+
 
     <button class="primary" id="generate-btn">Получить пересказ</button>
 

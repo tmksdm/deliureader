@@ -8,6 +8,7 @@
 // Этап 10.4: панель кнопок закреплена внизу, пока показан пересказ.
 // Этап 11: история пересказов — автосохранение, список, открытие, удаление.
 // Этап 13: скачивание пересказа как .txt.
+// Этап 14: автоподсказки из списка книг ВГИК.
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
@@ -158,6 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Если открыта история — спрятать её, показываем результат.
     hideHistory();
+
+    // Этап 14: при запуске генерации прячем список подсказок.
+    hideSuggestions();
 
     // Если до этого что-то читалось — остановить.
     if (typeof stop === 'function') stop();
@@ -542,4 +546,101 @@ document.addEventListener('DOMContentLoaded', () => {
   settingsClose.addEventListener('click', closeSettings);
   settingsOverlay.addEventListener('click', closeSettings);
   settingsSave.addEventListener('click', saveSettings);
+
+
+  // ========================================================
+  // --- Этап 14: автоподсказки из списка книг ВГИК ---
+  // ========================================================
+
+  const suggestionsBox = document.getElementById('suggestions');
+
+  // Сюда загрузим список книг из data/required-books.json (массив {author, title}).
+  let requiredBooks = [];
+
+  // Грузим список книг сразу при старте — чтобы подсказки были готовы
+  // к первому же набору. Если файл не загрузился — массив останется пустым,
+  // подсказок просто не будет, на остальное приложение это не влияет.
+  loadRequiredBooks().then((books) => {
+    requiredBooks = books;
+  });
+
+  // Привести строку к «поисковому» виду: нижний регистр, без точек,
+  // лишние пробелы схлопнуты. Чтобы «достоевский» находил «Ф.М. Достоевский»,
+  // а регистр и инициалы не мешали поиску.
+  function normalizeForSearch(str) {
+    return (str || '')
+      .toLowerCase()
+      .replace(/\./g, ' ')   // точки в инициалах → пробел
+      .replace(/ё/g, 'е')    // ё и е считаем одинаковыми
+      .replace(/\s+/g, ' ')  // лишние пробелы схлопываем
+      .trim();
+  }
+
+  // Спрятать список подсказок.
+  function hideSuggestions() {
+    suggestionsBox.hidden = true;
+    suggestionsBox.innerHTML = '';
+  }
+
+  // Подобрать и показать подсказки под то, что набрал пользователь.
+  function renderSuggestions() {
+    const query = normalizeForSearch(queryInput.value);
+
+    // Поле пустое или список книг не загрузился — прячем подсказки.
+    if (query === '' || requiredBooks.length === 0) {
+      hideSuggestions();
+      return;
+    }
+
+    // Оставляем книги, где запрос встречается в авторе ИЛИ в названии.
+    const matches = requiredBooks.filter((book) => {
+      const haystack = normalizeForSearch(book.author + ' ' + book.title);
+      return haystack.includes(query);
+    }).slice(0, 8); // не больше 8 подсказок, чтобы список не разрастался
+
+    // Совпадений нет — прячем список.
+    if (matches.length === 0) {
+      hideSuggestions();
+      return;
+    }
+
+    // Рисуем список заново.
+    suggestionsBox.innerHTML = '';
+    matches.forEach((book) => {
+      const li = document.createElement('li');
+      li.className = 'suggestions__item';
+      // То, что покажем пользователю и вставим в поле при клике.
+      const label = book.author + ' — ' + book.title;
+      li.textContent = label;
+      li.addEventListener('click', () => {
+        queryInput.value = label;
+        hideSuggestions();
+        queryInput.focus();
+      });
+      suggestionsBox.appendChild(li);
+    });
+
+    suggestionsBox.hidden = false;
+  }
+
+  // Набор текста в поле → пересобираем подсказки.
+  queryInput.addEventListener('input', renderSuggestions);
+
+  // Фокус на поле → если там уже что-то есть, сразу показать подсказки.
+  queryInput.addEventListener('focus', renderSuggestions);
+
+  // Клик мимо поля и списка → прячем подсказки.
+  document.addEventListener('click', (e) => {
+    if (e.target !== queryInput && !suggestionsBox.contains(e.target)) {
+      hideSuggestions();
+    }
+  });
+
+  // Enter в поле → прячем подсказки (чтобы не мешали), а генерацию
+  // запускает кнопка. Esc — тоже прячем.
+  queryInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === 'Escape') {
+      hideSuggestions();
+    }
+  });
 });

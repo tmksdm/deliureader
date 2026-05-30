@@ -2,6 +2,7 @@
 // Модуль хранения настроек DeliuReader в памяти браузера (localStorage).
 // Этап 7: API-ключ OpenRouter + выбранная модель.
 // Этап 11: история пересказов (сохранение, чтение, удаление).
+// Этап 14: загрузка списка книг ВГИК для автоподсказок.
 
 // Ключи, под которыми храним данные в localStorage.
 // Префикс "deliu." — чтобы не пересекаться с чужими записями.
@@ -65,6 +66,26 @@ async function loadModels() {
     return Array.isArray(data.models) ? data.models : [];
   } catch (err) {
     console.error('STORAGE: ошибка чтения models.json', err);
+    return [];
+  }
+}
+
+// --- Список книг ВГИК (из data/required-books.json) для автоподсказок (этап 14) ---
+
+// Загрузить список приоритетных произведений ВГИК из файла репозитория.
+// Возвращает массив объектов {author, title}. При ошибке — пустой массив
+// (подсказки просто не появятся, на остальную работу приложения это не влияет).
+async function loadRequiredBooks() {
+  try {
+    const response = await fetch('data/required-books.json', { cache: 'no-store' });
+    if (!response.ok) {
+      console.error('STORAGE: не удалось загрузить required-books.json, статус', response.status);
+      return [];
+    }
+    const data = await response.json();
+    return Array.isArray(data.books) ? data.books : [];
+  } catch (err) {
+    console.error('STORAGE: ошибка чтения required-books.json', err);
     return [];
   }
 }
