@@ -173,7 +173,19 @@ document.addEventListener('DOMContentLoaded', () => {
       stopBtn.hidden = true;
       rewindBtn.hidden = true;
     }
+
+    // Этап 10.1: во время чтения (играет ИЛИ на паузе) прилепляем
+    // панель кнопок к низу экрана, чтобы до неё всегда можно было
+    // дотянуться. Когда чтение остановлено — возвращаем в карточку.
+    if (state.isPlaying) {
+      resultControls.classList.add('result__controls--floating');
+      document.body.classList.add('is-playing');
+    } else {
+      resultControls.classList.remove('result__controls--floating');
+      document.body.classList.remove('is-playing');
+    }
   }
+
 
   // ========================================================
   // --- Этап 7: экран настроек (ключ OpenRouter + модель) ---
