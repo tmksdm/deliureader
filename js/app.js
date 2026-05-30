@@ -9,7 +9,7 @@
 // Этап 11: история пересказов — автосохранение, список, открытие, удаление.
 // Этап 13: скачивание пересказа как .txt.
 // Этап 14: автоподсказки из списка книг ВГИК.
-// Этап 15: inline-сообщения вместо alert/confirm (части 2–3).
+// Этап 15: inline-сообщения вместо alert/confirm (части 2–3); тема оформления (часть 5).
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
@@ -791,4 +791,59 @@ document.addEventListener('DOMContentLoaded', () => {
       hideSuggestions();
     }
   });
+
+
+  // ========================================================
+  // --- Этап 15 (часть 5): тема оформления (светлая / тёмная) ---
+  // ========================================================
+  // Логика «рубильника»: на теге <html> стоит атрибут data-theme
+  // со значением 'light' или 'dark'. CSS рисует цвета под текущее
+  // значение. Выбор пользователя храним в localStorage под ключом
+  // deliu.theme, чтобы при следующем заходе тема была сразу нужная.
+
+  const themeBtn = document.getElementById('theme-btn');
+  const THEME_STORAGE_KEY = 'deliu.theme';
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
+  // Цвет системной полоски браузера под каждую тему (meta theme-color).
+  const THEME_BAR_COLOR = { light: '#1a2a4a', dark: '#11151c' };
+
+  // Прочитать сохранённую тему. Если её нет — по умолчанию светлая.
+  function getSavedTheme() {
+    try {
+      const t = localStorage.getItem(THEME_STORAGE_KEY);
+      return t === 'dark' ? 'dark' : 'light';
+    } catch (e) {
+      return 'light';
+    }
+  }
+
+  // Применить тему: выставить атрибут на <html>, поменять иконку
+  // кнопки и цвет системной полоски. Иконка показывает, КУДА переключит
+  // следующий тап: в светлой теме видим 🌙 (тап → тёмная), в тёмной — ☀.
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeBtn.textContent = theme === 'dark' ? '☀' : '🌙';
+    themeBtn.title = theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', THEME_BAR_COLOR[theme]);
+    }
+  }
+
+  // По клику переключаем тему на противоположную и запоминаем выбор.
+  themeBtn.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'dark'
+      ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch (e) {
+      // Если localStorage недоступен — тема просто не запомнится, не критично.
+    }
+  });
+
+  // При загрузке сразу применяем сохранённую тему.
+  applyTheme(getSavedTheme());
+
 });
