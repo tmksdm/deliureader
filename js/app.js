@@ -9,7 +9,7 @@
 // Этап 11: история пересказов — автосохранение, список, открытие, удаление.
 // Этап 13: скачивание пересказа как .txt.
 // Этап 14: автоподсказки из списка книг ВГИК.
-// Этап 15: inline-сообщения вместо alert (часть 2).
+// Этап 15: inline-сообщения вместо alert (часть 2 — запрос и настройки).
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
@@ -504,9 +504,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const modelSelect     = document.getElementById('model-select');
   const modelNote       = document.getElementById('model-note');
   const settingsStatus  = document.getElementById('settings-status');
+  const settingsMessage = document.getElementById('settings-message'); // Этап 15: inline-строка вместо alert
 
   // Список моделей, загруженный из data/models.json (заполнится при загрузке страницы).
   let availableModels = [];
+
+  // Этап 15: показать сообщение в окне настроек.
+  // type: 'error' (красноватое) или 'ok' (зеленоватое).
+  function showSettingsMessage(text, type) {
+    settingsMessage.textContent = text;
+    settingsMessage.className = 'inline-message inline-message--' + type;
+    settingsMessage.hidden = false;
+  }
+
+  // Этап 15: спрятать сообщение в окне настроек.
+  function hideSettingsMessage() {
+    settingsMessage.hidden = true;
+    settingsMessage.textContent = '';
+  }
 
   // Загружаем список моделей сразу при старте, чтобы окно открывалось уже готовым.
   loadModels().then((models) => {
@@ -556,6 +571,9 @@ document.addEventListener('DOMContentLoaded', () => {
     showModelNote();
     updateSettingsStatus();
 
+    // Этап 15: при открытии окна старое сообщение убираем.
+    hideSettingsMessage();
+
     settingsModal.hidden = false;
   }
 
@@ -581,12 +599,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Если поле не пустое — проверяем формат. Пустое разрешаем (вдруг хочет стереть).
     if (key !== '' && !isValidApiKeyFormat(key)) {
-      alert('Ключ OpenRouter должен начинаться с «sk-or-v1-». Проверь, что скопировал его целиком.');
+      // Этап 15: вместо alert — красноватая строка в окне.
+      showSettingsMessage('Ключ OpenRouter должен начинаться с «sk-or-v1-». Проверь, что скопировал его целиком.', 'error');
       return;
     }
 
     if (modelSelect.value === '') {
-      alert('Выбери модель из списка.');
+      showSettingsMessage('Выбери модель из списка.', 'error');
       return;
     }
 
@@ -594,8 +613,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setModelId(modelSelect.value);
     updateSettingsStatus();
 
-    alert('Настройки сохранены.');
-    closeSettings();
+    // Этап 15: зелёное подтверждение прямо в окне, затем окно само закрывается,
+    // чтобы человек успел увидеть «Сохранено».
+    showSettingsMessage('Настройки сохранены.', 'ok');
+    setTimeout(() => {
+      closeSettings();
+    }, 900);
   }
 
   // Навешиваем обработчики на элементы окна.
