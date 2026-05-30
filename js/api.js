@@ -73,6 +73,13 @@ async function requestSummary(systemPrompt, userQuery) {
     if (response.status === 402) {
       throw new Error('MODEL_PAID');
     }
+    // 403 — провайдер модели заблокировал запрос. Частая причина —
+    // региональные ограничения (например, Google AI Studio отбивает
+    // запросы к бесплатным Gemma из некоторых стран). Не наша ошибка —
+    // просто эта модель недоступна, нужно выбрать другую.
+    if (response.status === 403) {
+      throw new Error('MODEL_BLOCKED');
+    }
     // 404 — модель не найдена (id устарел / убрали с OpenRouter).
     if (response.status === 404) {
       throw new Error('MODEL_NOT_FOUND');
@@ -113,6 +120,8 @@ function describeApiError(message) {
       return 'Ключ не подошёл. Проверь его в настройках (⚙).';
     case 'MODEL_PAID':
       return 'Эта модель больше не бесплатна. Выбери другую в настройках (⚙).';
+    case 'MODEL_BLOCKED':
+      return 'Модель заблокировала запрос (часто из-за региона). Выбери другую в настройках (⚙).';
     case 'MODEL_NOT_FOUND':
       return 'Модель недоступна (возможно, её убрали). Выбери другую в настройках (⚙).';
     case 'RATE_LIMIT':
