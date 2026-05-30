@@ -1,0 +1,31 @@
+{
+  "updated": "2026-05-30",
+  "note": "Список бесплатных моделей OpenRouter. Обновляется вручную. Только бесплатные (:free).",
+  "models": [
+    {
+      "id": "google/gemma-4-31b-it:free",
+      "name": "Gemma 4 31B",
+      "note": "Рекомендуется. Лидер рейтинга бесплатных моделей."
+    },
+    {
+      "id": "nvidia/nemotron-3-super-120b-a12b:free",
+      "name": "Nemotron 3 Super 120B",
+      "note": "Крупная модель от NVIDIA, большой контекст."
+    },
+    {
+      "id": "google/gemma-4-26b-a4b-it:free",
+      "name": "Gemma 4 26B A4B",
+      "note": "Младшая Gemma, тоже от Google."
+    },
+    {
+      "id": "minimax/minimax-m2.5:free",
+      "name": "MiniMax M2.5",
+      "note": "Хорошее качество, поддержка reasoning."
+    },
+    {
+      "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "name": "Nemotron 3 Nano Omni",
+      "note": "Компактная reasoning-модель от NVIDIA."
+    }
+  ]
+}
