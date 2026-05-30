@@ -28,9 +28,13 @@
   <main>
     <div class="field field--query">
       <label for="query">Автор и название</label>
-      <input id="query" type="text" placeholder="Достоевский Преступление и наказание" autocomplete="off">
-      <ul id="suggestions" class="suggestions" hidden></ul>
+      <div class="field__input-wrap">
+        <input id="query" name="book-query" type="text" placeholder="Достоевский Преступление и наказание"
+               autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <ul id="suggestions" class="suggestions" hidden></ul>
+      </div>
     </div>
+
 
 
     <button class="primary" id="generate-btn">Получить пересказ</button>
