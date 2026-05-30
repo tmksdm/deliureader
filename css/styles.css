@@ -319,3 +319,9 @@ header {
 .settings-status--warn {
   color: #b26a00;
 }
+
+/* Воздух между полями внутри окна настроек */
+.modal__box .field + .field {
+  margin-top: 18px;
+}
+
