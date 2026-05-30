@@ -676,3 +676,21 @@ button.danger:disabled {
   border: 1px solid #bcd9c2;
   color: #2f6b3c;
 }
+
+/* Этап 15: крестик удаления в режиме подтверждения («Удалить?»).
+   Появляется после первого тапа, сам гаснет через пару секунд. */
+.history__delete.is-confirming {
+  width: auto;
+  padding: 0 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: #c0392b;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+/* Этап 15: кнопка «Удалить выбранные» в режиме подтверждения. */
+.danger.danger--confirming {
+  background: #a5281b;
+}

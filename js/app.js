@@ -9,7 +9,7 @@
 // Этап 11: история пересказов — автосохранение, список, открытие, удаление.
 // Этап 13: скачивание пересказа как .txt.
 // Этап 14: автоподсказки из списка книг ВГИК.
-// Этап 15: inline-сообщения вместо alert (часть 2 — запрос и настройки).
+// Этап 15: inline-сообщения вместо alert/confirm (части 2–3).
 
 document.addEventListener('DOMContentLoaded', () => {
   const queryInput   = document.getElementById('query');
@@ -344,6 +344,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const historySelectAll      = document.getElementById('history-select-all');
   const historyDeleteSelected = document.getElementById('history-delete-selected');
 
+  // Этап 15: исходный текст кнопки «Удалить выбранные» — чтобы возвращать
+  // его после сброса режима подтверждения.
+  const DELETE_SELECTED_LABEL = 'Удалить выбранные';
+
+  // Этап 15: флаг — кнопка пачки сейчас в режиме «Точно удалить?».
+  let deleteSelectedConfirming = false;
+
   // Превратить метку времени в человекочитаемую дату вида «28.05.2026, 15:06».
   function formatDate(ms) {
     try {
@@ -356,9 +363,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Этап 15: сбросить кнопку «Удалить выбранные» из режима подтверждения
+  // обратно в обычный вид.
+  function resetDeleteSelectedConfirm() {
+    deleteSelectedConfirming = false;
+    historyDeleteSelected.textContent = DELETE_SELECTED_LABEL;
+    historyDeleteSelected.classList.remove('danger--confirming');
+  }
+
   // Перерисовать список истории целиком из localStorage.
   function renderHistory() {
     const items = getHistory();
+
+    // Этап 15: при перерисовке сбрасываем подтверждение кнопки пачки.
+    resetDeleteSelectedConfirm();
 
     // Чистим список перед новой отрисовкой.
     historyList.innerHTML = '';
@@ -382,7 +400,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const check = document.createElement('input');
       check.type = 'checkbox';
       check.className = 'history__check';
-      check.addEventListener('change', updateSelectAllState);
+      check.addEventListener('change', () => {
+        // Этап 15: смена выбора отменяет подтверждение пачки.
+        resetDeleteSelectedConfirm();
+        updateSelectAllState();
+      });
 
       // Кликабельная середина — открывает пересказ.
       const open = document.createElement('button');
@@ -401,13 +423,13 @@ document.addEventListener('DOMContentLoaded', () => {
       open.appendChild(date);
       open.addEventListener('click', () => openHistoryItem(item.id));
 
-      // Крестик — удалить одну запись.
+      // Крестик — удалить одну запись (с двухшаговым подтверждением).
       const del = document.createElement('button');
       del.type = 'button';
       del.className = 'history__delete';
       del.setAttribute('aria-label', 'Удалить пересказ');
       del.textContent = '✕';
-      del.addEventListener('click', () => deleteOne(item.id, item.query));
+      del.addEventListener('click', () => handleDeleteClick(del, item.id));
 
       li.appendChild(check);
       li.appendChild(open);
@@ -432,6 +454,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Спрятать раздел «История».
   function hideHistory() {
+    // Этап 15: при закрытии истории сбрасываем подтверждение пачки.
+    resetDeleteSelectedConfirm();
     historyBlock.hidden = true;
   }
 
@@ -460,16 +484,34 @@ document.addEventListener('DOMContentLoaded', () => {
     historyDeleteSelected.disabled = checkedCount === 0;
   }
 
-  // Удалить одну запись (крестик) — с подтверждением.
-  function deleteOne(id, query) {
-    const label = query ? `«${query}»` : 'этот пересказ';
-    if (!confirm(`Удалить ${label}?`)) return;
-    deleteHistoryItem(id);
-    renderHistory();
+  // Этап 15: удаление одной записи — двухшаговое подтверждение прямо на крестике.
+  // Первый тап: крестик → красное «Удалить?», заводим таймер на возврат.
+  // Второй тап (пока активно): реально удаляем.
+  function handleDeleteClick(btn, id) {
+    if (btn.classList.contains('is-confirming')) {
+      // Второй тап — удаляем.
+      if (btn._confirmTimer) clearTimeout(btn._confirmTimer);
+      deleteHistoryItem(id);
+      renderHistory();
+      return;
+    }
+
+    // Первый тап — переводим крестик в режим подтверждения.
+    btn.classList.add('is-confirming');
+    btn.textContent = 'Удалить?';
+
+    // Через 3 секунды без второго тапа — возвращаем крестик обратно.
+    btn._confirmTimer = setTimeout(() => {
+      btn.classList.remove('is-confirming');
+      btn.textContent = '✕';
+      btn._confirmTimer = null;
+    }, 3000);
   }
 
   // «Выбрать все» — отметить/снять все галочки.
   historySelectAll.addEventListener('change', () => {
+    // Этап 15: массовая смена выбора отменяет подтверждение пачки.
+    resetDeleteSelectedConfirm();
     const checked = historySelectAll.checked;
     historyList.querySelectorAll('.history__check').forEach((c) => {
       c.checked = checked;
@@ -477,11 +519,20 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSelectAllState();
   });
 
-  // «Удалить выбранные» — пачкой, с подтверждением.
+  // «Удалить выбранные» — двухшаговое подтверждение на самой кнопке.
   historyDeleteSelected.addEventListener('click', () => {
     const ids = getCheckedIds();
     if (ids.length === 0) return;
-    if (!confirm(`Удалить выбранные пересказы (${ids.length})?`)) return;
+
+    if (!deleteSelectedConfirming) {
+      // Первый клик — просим подтверждение.
+      deleteSelectedConfirming = true;
+      historyDeleteSelected.textContent = `Точно удалить? (${ids.length})`;
+      historyDeleteSelected.classList.add('danger--confirming');
+      return;
+    }
+
+    // Второй клик — удаляем.
     deleteHistoryItems(ids);
     renderHistory();
   });
