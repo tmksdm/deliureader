@@ -706,11 +706,17 @@ button.danger:disabled {
    ======================================================== */
 
 /* Фон страницы и базовый цвет текста */
+[data-theme="dark"] html {
+  background: #11151c;
+}
 [data-theme="dark"] html,
 [data-theme="dark"] body {
-  background: #11151c;
   color: #e6e6e6;
 }
+[data-theme="dark"] body {
+  background: transparent;
+}
+
 
 /* Подпись под полем, второстепенный текст */
 [data-theme="dark"] .field label,
@@ -858,4 +864,18 @@ button.danger:disabled {
   background: #20242b;
   border-color: #333b45;
   color: #b8c0c9;
+}
+
+
+/* Этап 15: inline-плашки (ошибка под полем, сообщения настроек) в тёмной теме */
+[data-theme="dark"] .inline-error,
+[data-theme="dark"] .inline-message--error {
+  background: #2e1a16;
+  border-color: #6b3a2c;
+  color: #f0b3a0;
+}
+[data-theme="dark"] .inline-message--ok {
+  background: #16261a;
+  border-color: #2f5a3a;
+  color: #a7e0b5;
 }
