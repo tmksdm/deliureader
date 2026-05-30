@@ -706,15 +706,10 @@ button.danger:disabled {
    ======================================================== */
 
 /* Фон страницы и базовый цвет текста */
-[data-theme="dark"] html {
-  background: #11151c;
-}
 [data-theme="dark"] html,
 [data-theme="dark"] body {
+  background: #11151c;
   color: #e6e6e6;
-}
-[data-theme="dark"] body {
-  background: transparent;
 }
 
 
