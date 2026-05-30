@@ -366,7 +366,7 @@ header {
 
 /* === Этап 10.3: предупреждение о возможных ошибках нейросети === */
 .result__disclaimer {
-  margin-top: 16px;
+  margin: 4px 0 16px;
   padding: 10px 12px;
   font-size: 0.82rem;
   line-height: 1.45;
@@ -375,6 +375,7 @@ header {
   border: 1px solid #ecd9a0;
   border-radius: 10px;
 }
+
 
 .result__disclaimer[hidden] {
   display: none;
